@@ -17,9 +17,10 @@ class Chat extends StatefulWidget {
 }
 
 class ChatState extends State<Chat> {
-  final String webSocketUrl = 'http://localhost:8080/stomp/chat';
+  final String webSocketUrl = 'http://192.168.0.81:8080/stomp/chat';
   late StompClient _client;
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   List<dynamic> messages = [];
 
   @override
@@ -41,24 +42,29 @@ class ChatState extends State<Chat> {
       headers: {},
       callback: (frame) {
         setState(() {
-          messages.add(json.decode(frame.body!));
+          messages.insert(0, json.decode(frame.body!)); // 새로운 메시지를 리스트의 맨 앞에 추가합니다.
+          _scrollController.jumpTo(_scrollController.position.minScrollExtent); // 스크롤을 맨 위로 이동합니다.
         });
       },
     );
   }
 
   Future<void> _fetchChatRoom() async {
-    final url = Uri.parse("http://localhost:8080/chat/room/resp?chatRoomId=${widget.chatRoomId}&accountId=${widget.accountId}");
+    if (!mounted) return;
+
+    final url = Uri.parse("http://192.168.0.81:8080/chat/room/resp?chatRoomId=${widget.chatRoomId}&accountId=${widget.accountId}");
     final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      final chatMessages = jsonResponse['chatMessagesInRoom'];
-      setState(() {
-        messages.addAll(chatMessages);
-      });
-    } else {
-      throw Exception("Failed to fetch chat room");
+    if (mounted) {
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final chatMessages = jsonResponse['chatMessagesInRoom'];
+        setState(() {
+          messages.addAll(chatMessages);
+        });
+      } else {
+        throw Exception("Failed to fetch chat room");
+      }
     }
   }
 
@@ -72,15 +78,57 @@ class ChatState extends State<Chat> {
           'message': message,
           'accountId': widget.accountId,
           'nickname': 'test',
-        }), // Format the message as needed
+        }),
       );
       _controller.clear();
     }
   }
 
+  void _fetchAndShowItems() async {
+    final url = Uri.parse("http://192.168.0.81:8080/items");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> items = jsonDecode(response.body);
+      _showItems(items);
+    } else {
+      throw Exception("Failed to fetch items");
+    }
+  }
+
+  void _showItems(List<dynamic> items) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Items"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: items.map((item) {
+                return ListTile(
+                  title: Text(item['name']),
+                  subtitle: Text(item['description']),
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text('Chat'),
       ),
@@ -91,13 +139,14 @@ class ChatState extends State<Chat> {
           children: [
             Expanded(
               child: ListView.builder(
-                reverse: false,
+                reverse: true,
                 itemCount: messages.length,
+                controller: _scrollController,
                 itemBuilder: (context, index) {
                   Map<String, dynamic> item = messages[index];
                   bool isMyMessage = item['accountId'] == widget.accountId;
                   return Column(
-                    crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    crossAxisAlignment: isMyMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
                     children: [
                       Text(
                         item['nickname'],
@@ -107,7 +156,7 @@ class ChatState extends State<Chat> {
                         ),
                       ),
                       Align(
-                        alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment: isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
                         child: Container(
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.symmetric(vertical: 5),
@@ -145,6 +194,11 @@ class ChatState extends State<Chat> {
                   onPressed: _sendMessage,
                   child: Text('Send'),
                 ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: _fetchAndShowItems,
+                  child: Text('Show Items'),
+                ),
               ],
             ),
           ],
@@ -155,6 +209,7 @@ class ChatState extends State<Chat> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _client.deactivate();
     _controller.dispose();
     super.dispose();

@@ -41,7 +41,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
   }
 
   Future<void> _fetchChatRooms() async {
-    final url = Uri.parse("http://localhost:8080/chat/${widget.accountId}/room");
+    final url = Uri.parse("http://192.168.0.81:8080/chat/${widget.accountId}/room");
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -68,9 +68,8 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
                 final chatRoom = chatRooms[index];
                 return ListTile(
                   title: Text('채팅방'),
-                  subtitle: Text('걍 연습용 채팅방임'),
+                  subtitle: Text(chatRoom.recentMessage), // 최근 메시지 표시
                   onTap: () {
-                    // Navigate to chat room page with the selected chat room ID
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -96,12 +95,14 @@ class ChatRoomResponseDTO {
   final List<String> participantIds;
   final String clientId;
   final String brokerId;
+  final String recentMessage; // 최근 메시지 필드 추가
 
   ChatRoomResponseDTO({
     required this.id,
     required this.participantIds,
     required this.clientId,
     required this.brokerId,
+    required this.recentMessage, // 생성자에 최근 메시지 필드 추가
   });
 
   factory ChatRoomResponseDTO.fromJson(Map<String, dynamic> json) {
@@ -110,6 +111,7 @@ class ChatRoomResponseDTO {
       participantIds: List<String>.from(json['participantIds']),
       clientId: json['clientId'],
       brokerId: json['brokerId'],
+      recentMessage: json['recentMessage'], // 최근 메시지 필드 초기화
     );
   }
 }
