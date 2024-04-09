@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:mychat/chat.dart';
 
 import 'chatRoomList.dart';
 
@@ -18,7 +19,8 @@ class ChatRoomForm extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.blue,
       ),
-      home: ChatRoomList(accountId: 'qassadsadsa'),
+      // home: ChatRoomList(accountId: 'qassadsadsa'),
+      home: Chat(accountId: 'qassadsadsa', chatRoomId: '1e49ce63-1780-4692-9474-8f7061a7a98c'),
     );
   }
 }

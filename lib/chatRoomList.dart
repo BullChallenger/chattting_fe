@@ -41,11 +41,11 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
   }
 
   Future<void> _fetchChatRooms() async {
-    final url = Uri.parse("http://192.168.0.81:8080/chat/${widget.accountId}/room");
+    final url = Uri.parse("http://192.168.0.107:8080/chat/${widget.accountId}/room");
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonList = jsonDecode(response.body);
+      final List<dynamic> jsonList = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
         chatRooms = jsonList.map((json) => ChatRoomResponseDTO.fromJson(json)).toList();
       });
@@ -67,7 +67,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
               itemBuilder: (context, index) {
                 final chatRoom = chatRooms[index];
                 return ListTile(
-                  title: Text('채팅방'),
+                  title: Text(chatRoom.nickname),
                   subtitle: Text(chatRoom.recentMessage), // 최근 메시지 표시
                   onTap: () {
                     Navigator.push(
@@ -93,6 +93,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
 class ChatRoomResponseDTO {
   final String id;
   final List<String> participantIds;
+  final String nickname;
   final String clientId;
   final String brokerId;
   final String recentMessage; // 최근 메시지 필드 추가
@@ -100,6 +101,7 @@ class ChatRoomResponseDTO {
   ChatRoomResponseDTO({
     required this.id,
     required this.participantIds,
+    required this.nickname,
     required this.clientId,
     required this.brokerId,
     required this.recentMessage, // 생성자에 최근 메시지 필드 추가
@@ -109,6 +111,7 @@ class ChatRoomResponseDTO {
     return ChatRoomResponseDTO(
       id: json['id'],
       participantIds: List<String>.from(json['participantIds']),
+      nickname: json['nickname'],
       clientId: json['clientId'],
       brokerId: json['brokerId'],
       recentMessage: json['recentMessage'], // 최근 메시지 필드 초기화

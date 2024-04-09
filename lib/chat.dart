@@ -17,7 +17,7 @@ class Chat extends StatefulWidget {
 }
 
 class ChatState extends State<Chat> {
-  final String webSocketUrl = 'http://192.168.0.81:8080/stomp/chat';
+  final String webSocketUrl = 'http://10.0.2.2:8080/stomp/chat';
   late StompClient _client;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -33,7 +33,7 @@ class ChatState extends State<Chat> {
       ),
     );
     _client.activate();
-    _fetchChatRoom();
+    // _fetchChatRoom();
   }
 
   void onConnectCallback(StompFrame connectFrame) {
@@ -49,24 +49,24 @@ class ChatState extends State<Chat> {
     );
   }
 
-  Future<void> _fetchChatRoom() async {
-    if (!mounted) return;
-
-    final url = Uri.parse("http://192.168.0.81:8080/chat/room/resp?chatRoomId=${widget.chatRoomId}&accountId=${widget.accountId}");
-    final response = await http.get(url);
-
-    if (mounted) {
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final chatMessages = jsonResponse['chatMessagesInRoom'];
-        setState(() {
-          messages.addAll(chatMessages);
-        });
-      } else {
-        throw Exception("Failed to fetch chat room");
-      }
-    }
-  }
+  // Future<void> _fetchChatRoom() async {
+  //   if (!mounted) return;
+  //
+  //   final url = Uri.parse("http://192.168.0.107:8080/chat/room/resp?chatRoomId=${widget.chatRoomId}&accountId=${widget.accountId}");
+  //   final response = await http.get(url);
+  //
+  //   if (mounted) {
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+  //       final chatMessages = jsonResponse['chatMessagesInRoom'];
+  //       setState(() {
+  //         messages.addAll(chatMessages);
+  //       });
+  //     } else {
+  //       throw Exception("Failed to fetch chat room");
+  //     }
+  //   }
+  // }
 
   void _sendMessage() {
     final message = _controller.text;
@@ -81,18 +81,6 @@ class ChatState extends State<Chat> {
         }),
       );
       _controller.clear();
-    }
-  }
-
-  void _fetchAndShowItems() async {
-    final url = Uri.parse("http://192.168.0.81:8080/items");
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> items = jsonDecode(response.body);
-      _showItems(items);
-    } else {
-      throw Exception("Failed to fetch items");
     }
   }
 
@@ -193,11 +181,6 @@ class ChatState extends State<Chat> {
                 ElevatedButton(
                   onPressed: _sendMessage,
                   child: Text('Send'),
-                ),
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _fetchAndShowItems,
-                  child: Text('Show Items'),
                 ),
               ],
             ),
