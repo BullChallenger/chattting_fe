@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:stomp_dart_client/stomp.dart';
@@ -17,7 +19,8 @@ class Chat extends StatefulWidget {
 }
 
 class ChatState extends State<Chat> {
-  final String webSocketUrl = 'http://10.0.2.2:8080/stomp/chat';
+  // final String webSocketUrl = 'http://10.0.2.2:8080/stomp/chat';
+  final String webSocketUrl = 'http://localhost:8080/stomp/chat';
   late StompClient _client;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -145,6 +148,10 @@ class ChatState extends State<Chat> {
                       ),
                       Align(
                         alignment: isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () {
+                          _launchURL(item['message']);
+                        },
                         child: Container(
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.symmetric(vertical: 5),
@@ -160,7 +167,7 @@ class ChatState extends State<Chat> {
                           ),
                         ),
                       ),
-                    ],
+                    )],
                   );
                 },
               ),
@@ -196,5 +203,13 @@ class ChatState extends State<Chat> {
     _client.deactivate();
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
