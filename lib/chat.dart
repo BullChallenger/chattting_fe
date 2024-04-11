@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:url_launcher/url_launcher.dart';
+  import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -19,8 +19,8 @@ class Chat extends StatefulWidget {
 }
 
 class ChatState extends State<Chat> {
-  // final String webSocketUrl = 'http://10.0.2.2:8080/stomp/chat';
-  final String webSocketUrl = 'http://localhost:8080/stomp/chat';
+  // final String webSocketUrl = 'http://10.0.2.2:12952/stomp/chat';
+  final String webSocketUrl = 'http://localhost:12952/stomp/chat';
   late StompClient _client;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -137,7 +137,7 @@ class ChatState extends State<Chat> {
                   Map<String, dynamic> item = messages[index];
                   bool isMyMessage = item['accountId'] == widget.accountId;
                   return Column(
-                    crossAxisAlignment: isMyMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                    crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       Text(
                         item['nickname'],
@@ -147,7 +147,7 @@ class ChatState extends State<Chat> {
                         ),
                       ),
                       Align(
-                        alignment: isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
+                        alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
                         child: GestureDetector(
                           onTap: () {
                           _launchURL(item['message']);
