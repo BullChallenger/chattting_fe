@@ -36,7 +36,7 @@ class ChatState extends State<Chat> {
       ),
     );
     _client.activate();
-    // _fetchChatRoom();
+    _fetchChatRoom();
   }
 
   void onConnectCallback(StompFrame connectFrame) {
@@ -52,24 +52,24 @@ class ChatState extends State<Chat> {
     );
   }
 
-  // Future<void> _fetchChatRoom() async {
-  //   if (!mounted) return;
-  //
-  //   final url = Uri.parse("http://192.168.0.107:8080/chat/room/resp?chatRoomId=${widget.chatRoomId}&accountId=${widget.accountId}");
-  //   final response = await http.get(url);
-  //
-  //   if (mounted) {
-  //     if (response.statusCode == 200) {
-  //       final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
-  //       final chatMessages = jsonResponse['chatMessagesInRoom'];
-  //       setState(() {
-  //         messages.addAll(chatMessages);
-  //       });
-  //     } else {
-  //       throw Exception("Failed to fetch chat room");
-  //     }
-  //   }
-  // }
+  Future<void> _fetchChatRoom() async {
+    if (!mounted) return;
+
+    final url = Uri.parse("http://localhost:8080/chat/room/resp?chatRoomId=${widget.chatRoomId}&accountId=${widget.accountId}");
+    final response = await http.get(url);
+
+    if (mounted) {
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        final chatMessages = jsonResponse['chatMessagesInRoom'];
+        setState(() {
+          messages.addAll(chatMessages);
+        });
+      } else {
+        throw Exception("Failed to fetch chat room");
+      }
+    }
+  }
 
   void _sendMessage() {
     final message = _controller.text;
@@ -156,7 +156,7 @@ class ChatState extends State<Chat> {
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
-                            color: isMyMessage ? Colors.blue : Colors.grey,
+                            color: isMyMessage ? Color(0xFF224488) : Colors.grey,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(

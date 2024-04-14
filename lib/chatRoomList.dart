@@ -79,10 +79,10 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
           if (room.id == chatRoomId) {
             room.recentMessage = message;
 
-            // 업데이트된 채팅방을 chatRooms 리스트의 맨 앞으로 이동시킴
+            // Move the updated chat room to the top of the list
             var updatedRoom = chatRooms.removeAt(i);
             chatRooms.insert(0, updatedRoom);
-            break; // 이미 업데이트된 채팅방을 처리했으므로 루프 종료
+            break; // Exit loop as the updated chat room is processed
           }
         }
       });
@@ -101,20 +101,33 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
               itemCount: chatRooms.length,
               itemBuilder: (context, index) {
                 final chatRoom = chatRooms[index];
-                return ListTile(
-                  title: Text(chatRoom.nickname),
-                  subtitle: Text(chatRoom.recentMessage), // 최근 메시지 표시
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Chat(
-                          chatRoomId: chatRoom.id,
-                          accountId: widget.accountId,
+                // Inside the ListView.builder's itemBuilder method
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  color: Color(0xFF224488),
+                  elevation: 4.0, // Add elevation for a raised effect
+                  child: ListTile(
+                    title: Text(chatRoom.nickname, style: TextStyle(color: Colors.white),),
+                    subtitle: Text(
+                      chatRoom.recentMessage,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: Text(chatRoom.nickname[0], style: TextStyle(color: Color(0xFF224488)),),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Chat(
+                            chatRoomId: chatRoom.id,
+                            accountId: widget.accountId,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -131,7 +144,7 @@ class ChatRoomResponseDTO {
   final String nickname;
   final String clientId;
   final String brokerId;
-  String recentMessage; // 최근 메시지 필드 추가
+  String recentMessage;
 
   ChatRoomResponseDTO({
     required this.id,
@@ -139,7 +152,7 @@ class ChatRoomResponseDTO {
     required this.nickname,
     required this.clientId,
     required this.brokerId,
-    required this.recentMessage, // 생성자에 최근 메시지 필드 추가
+    required this.recentMessage,
   });
 
   factory ChatRoomResponseDTO.fromJson(Map<String, dynamic> json) {
@@ -149,7 +162,7 @@ class ChatRoomResponseDTO {
       nickname: json['nickname'],
       clientId: json['clientId'],
       brokerId: json['brokerId'],
-      recentMessage: json['recentMessage'], // 최근 메시지 필드 초기화
+      recentMessage: json['recentMessage'],
     );
   }
 }
